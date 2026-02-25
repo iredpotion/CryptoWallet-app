@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "crypto-wallet-v1-updated",
-		"name": "Crypto Wallet API (Dia 1)",
-		"description": "Collection para testar Auth e Wallet da crypto wallet. Inclui automação de token.",
+		"_postman_id": "crypto-wallet-v1-day3-fix",
+		"name": "Crypto Wallet API (Dia 3 - Final)",
+		"description": "Collection completa com Auth, Wallet, Webhook e Swap (Corrigido).",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -29,7 +29,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"dev@dev.com\",\n    \"password\": \"senha123456\"\n}",
+							"raw": "{\n    \"email\": \"investor@nexus.com\",\n    \"password\": \"senha123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -45,8 +45,7 @@
 								"auth",
 								"register"
 							]
-						},
-						"description": "Cria usuário e carteira automaticamente."
+						}
 					},
 					"response": []
 				},
@@ -57,20 +56,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"// Verifica se o login foi sucesso",
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"",
-									"// Pega o token da resposta",
 									"var jsonData = pm.response.json();",
-									"",
 									"if (jsonData.access_token) {",
-									"    // Salva na variável de coleção 'token'",
 									"    pm.collectionVariables.set(\"token\", jsonData.access_token);",
-									"    console.log(\"Token salvo automaticamente: \" + jsonData.access_token);",
-									"} else {",
-									"    console.log(\"Token não encontrado na resposta\");",
+									"    console.log(\"Token salvo: \" + jsonData.access_token);",
 									"}"
 								],
 								"type": "text/javascript"
@@ -82,7 +71,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"dev@dev.com\",\n    \"password\": \"senha123456\"\n}",
+							"raw": "{\n    \"email\": \"investor@nexus.com\",\n    \"password\": \"senha123\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -98,8 +87,7 @@
 								"auth",
 								"login"
 							]
-						},
-						"description": "Faz login e salva o JWT automaticamente para as próximas requisições."
+						}
 					},
 					"response": []
 				}
@@ -115,9 +103,12 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});"
+									"var jsonData = pm.response.json();",
+									"if (jsonData.userId) {",
+									"    pm.collectionVariables.set(\"userId\", jsonData.userId);",
+									"} else if (jsonData.user && jsonData.user.id) {",
+									"    pm.collectionVariables.set(\"userId\", jsonData.user.id);",
+									"}"
 								],
 								"type": "text/javascript"
 							}
@@ -134,40 +125,102 @@
 							"path": [
 								"wallet"
 							]
-						},
-						"description": "Usa o token salvo para buscar a carteira do usuário logado (Herda Auth da coleção)."
+						}
 					},
 					"response": []
 				},
 				{
-					"name": "4. Listar Todas (Admin)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});"
-								],
-								"type": "text/javascript"
+					"name": "4. Depositar (Webhook)",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"userId\": \"{{userId}}\",\n    \"token\": \"BRL\",\n    \"amount\": 10000,\n    \"idempotencyKey\": \"{{$guid}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
 							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/webhooks/deposit",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"webhooks",
+								"deposit"
+							]
 						}
-					],
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Swap (Dia 3)",
+			"item": [
+				{
+					"name": "5. Cotar BRL -> BTC",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/wallet/all",
+							"raw": "{{baseUrl}}/wallet/swap/quote?from=BRL&to=BTC&amount=5000",
 							"host": [
 								"{{baseUrl}}"
 							],
 							"path": [
 								"wallet",
-								"all"
+								"swap",
+								"quote"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "BRL"
+								},
+								{
+									"key": "to",
+									"value": "BTC"
+								},
+								{
+									"key": "amount",
+									"value": "5000"
+								}
 							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "6. Executar Swap",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"from\": \"BRL\",\n    \"to\": \"BTC\",\n    \"amount\": 5000\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
 						},
-						"description": "Rota de debug para ver todas as carteiras no banco."
+						"url": {
+							"raw": "{{baseUrl}}/wallet/swap",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"wallet",
+								"swap"
+							]
+						}
 					},
 					"response": []
 				}
@@ -184,26 +237,6 @@
 			}
 		]
 	},
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [
-					""
-				]
-			}
-		}
-	],
 	"variable": [
 		{
 			"key": "baseUrl",
@@ -212,6 +245,11 @@
 		},
 		{
 			"key": "token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "userId",
 			"value": "",
 			"type": "string"
 		}

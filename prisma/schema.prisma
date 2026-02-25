@@ -1,5 +1,4 @@
-// prisma/schema.prisma
-
+// Configuração do Banco de Dados
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,61 +8,55 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Modelo de Usuário
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String   // Lembre de hashear isso!
+  id                 String   @id @default(uuid())
+  email              String   @unique
+  password           String
   hashedRefreshToken String?
-  createdAt DateTime @default(now())
-  
-  // Relacionamentos
-  wallet    Wallet?
+  createdAt          DateTime @default(now())
+  wallet             Wallet?
 }
 
-// Requisito: Carteira suporta BRL, BTC, ETH [cite: 24]
+// Carteira Digital
 model Wallet {
-  id        String   @id @default(uuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  
-  // Saldos atuais (para leitura rápida) [cite: 25]
-  balances  Balance[] 
-  
-  // Histórico auditável 
-  transactions Transaction[]
+  id         String            @id @default(uuid())
+  userId     String            @unique
+  createdAt  DateTime          @default(now())
+  user       User              @relation(fields: [userId], references: [id])
+  assets     WalletAsset[]
+  statements WalletStatement[]
 }
 
-model Balance {
-  id        String   @id @default(uuid())
-  walletId  String
-  token     String   // BRL, BTC, ETH
-  amount    Decimal  @default(0) // Use Decimal para dinheiro, nunca Float!
-  
-  wallet    Wallet   @relation(fields: [walletId], references: [id])
+// Saldos por Token
+model WalletAsset {
+  id       String  @id @default(uuid())
+  walletId String
+  token    String
+  balance  Decimal @default(0) @db.Decimal(20, 8)
+  wallet   Wallet  @relation(fields: [walletId], references: [id])
 
-  @@unique([walletId, token]) // Um saldo por token por carteira
+  @@unique([walletId, token])
 }
 
-model Transaction {
-  id        String   @id @default(uuid())
-  walletId  String
-  type      TransactionType // Enum abaixo
-  token     String
-  amount    Decimal
-  
-  // Requisito: saldo anterior e novo no registro [cite: 56]
-  previousBalance Decimal
-  newBalance      Decimal
-  
-  timestamp DateTime @default(now())
-  
-  wallet    Wallet   @relation(fields: [walletId], references: [id])
+// Ledger de Movimentações
+model WalletStatement {
+  id            String   @id @default(uuid())
+  walletId      String
+  type          String
+  token         String
+  amount        Decimal  @db.Decimal(20, 8)
+  balanceBefore Decimal  @db.Decimal(20, 8)
+  balanceAfter  Decimal  @db.Decimal(20, 8)
+  createdAt     DateTime @default(now())
+  wallet        Wallet   @relation(fields: [walletId], references: [id])
 }
 
-enum TransactionType {
-  DEPOSIT
-  WITHDRAWAL
-  SWAP_IN
-  SWAP_OUT
-  SWAP_FEE
+// Controle de Idempotencia
+model IdempotencyLog {
+  key            String   @id
+  method         String
+  requestPayload String?
+  responseStatus Int
+  createdAt      DateTime @default(now())
 }
