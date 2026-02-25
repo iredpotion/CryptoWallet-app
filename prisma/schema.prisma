@@ -13,6 +13,7 @@ model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String   // Lembre de hashear isso!
+  hashedRefreshToken String?
   createdAt DateTime @default(now())
   
   // Relacionamentos

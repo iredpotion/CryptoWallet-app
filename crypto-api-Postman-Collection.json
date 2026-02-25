@@ -1,8 +1,8 @@
 {
 	"info": {
-		"_postman_id": "crypo-wallet-v1",
+		"_postman_id": "crypto-wallet-v1-updated",
 		"name": "Crypto Wallet API (Dia 1)",
-		"description": "Collection para testar Auth e Wallet da crypto wallet.",
+		"description": "Collection para testar Auth e Wallet da crypto wallet. Inclui automação de token.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -11,12 +11,25 @@
 			"item": [
 				{
 					"name": "1. Registrar Usuário",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"dev@nexus.com\",\n    \"password\": \"senha123456\"\n}",
+							"raw": "{\n    \"email\": \"dev@dev.com\",\n    \"password\": \"senha123456\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -44,6 +57,11 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"// Verifica se o login foi sucesso",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
 									"// Pega o token da resposta",
 									"var jsonData = pm.response.json();",
 									"",
@@ -51,8 +69,9 @@
 									"    // Salva na variável de coleção 'token'",
 									"    pm.collectionVariables.set(\"token\", jsonData.access_token);",
 									"    console.log(\"Token salvo automaticamente: \" + jsonData.access_token);",
-									"}",
-									""
+									"} else {",
+									"    console.log(\"Token não encontrado na resposta\");",
+									"}"
 								],
 								"type": "text/javascript"
 							}
@@ -63,7 +82,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"dev@nexus.com\",\n    \"password\": \"senha123456\"\n}",
+							"raw": "{\n    \"email\": \"dev@dev.com\",\n    \"password\": \"senha123456\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -91,17 +110,20 @@
 			"item": [
 				{
 					"name": "3. Minha Carteira",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{token}}",
-									"type": "string"
-								}
-							]
-						},
 						"method": "GET",
 						"header": [],
 						"url": {
@@ -113,12 +135,25 @@
 								"wallet"
 							]
 						},
-						"description": "Usa o token salvo para buscar a carteira do usuário logado."
+						"description": "Usa o token salvo para buscar a carteira do usuário logado (Herda Auth da coleção)."
 					},
 					"response": []
 				},
 				{
 					"name": "4. Listar Todas (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -139,6 +174,16 @@
 			]
 		}
 	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
 	"event": [
 		{
 			"listen": "prerequest",
