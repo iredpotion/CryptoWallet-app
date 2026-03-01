@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
-import Swal from 'sweetalert2';
 import Logo from '../components/Logo';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
-
-  const swalConfig = { background: '#ffffff', color: '#1a1a1a', confirmButtonColor: '#800020', backdrop: `rgba(0, 0, 0, 0.4)` };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,34 +16,26 @@ export default function Login() {
         localStorage.setItem('token', response.data.access_token);
         navigate('/dashboard'); 
       }
-    } catch (err: any) {
-      Swal.fire({ ...swalConfig, icon: 'error', title: 'Acesso Negado', text: 'Credenciais inválidas. Tente novamente.' });
-    }
+    } catch { alert('Credenciais inválidas'); }
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', backgroundColor: '#f8f9fa', fontFamily: 'sans-serif' }}>
-      <div style={{ width: '100%', maxWidth: '420px', padding: '50px 40px', backgroundColor: '#ffffff', borderRadius: '16px', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="card" style={{ width: '100%', maxWidth: '420px', padding: '50px 40px' }}>
         <Logo centered={true} />
-        
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '10px' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', color: '#6b7280', marginBottom: '8px' }}>E-MAIL</label>
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} 
-                   style={{ width: '100%', padding: '14px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px', color: '#1a1a1a', outline: 'none', boxSizing: 'border-box' }} />
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '8px' }}>E-MAIL</label>
+            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
           </div>
           <div>
-            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 'bold', color: '#6b7280', marginBottom: '8px' }}>SENHA</label>
-            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} 
-                   style={{ width: '100%', padding: '14px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px', color: '#1a1a1a', outline: 'none', boxSizing: 'border-box' }} />
+            <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-muted)', marginBottom: '8px' }}>SENHA</label>
+            <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="input-field" />
           </div>
-          <button type="submit" style={{ marginTop: '15px', width: '100%', padding: '14px', backgroundColor: '#800020', color: '#ffffff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>
-            Log In
-          </button>
+          <button type="submit" className="btn-primary" style={{ marginTop: '10px', padding: '16px' }}>Sign In</button>
         </form>
-        
-        <p style={{ marginTop: '25px', textAlign: 'center', fontSize: '0.95rem', color: '#6b7280' }}>
-          Não tem conta? <Link to="/register" style={{ color: '#800020', fontWeight: 'bold', textDecoration: 'none' }}>Cadastre-se</Link>
+        <p style={{ marginTop: '25px', textAlign: 'center', fontSize: '0.95rem', color: 'var(--text-muted)' }}>
+          Não tem conta? <Link to="/register" style={{ color: 'var(--primary)', fontWeight: 'bold', textDecoration: 'none' }}>Cadastre-se</Link>
         </p>
       </div>
     </div>

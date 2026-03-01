@@ -1,46 +1,54 @@
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 
 export default function Header() {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
 
-  const navLinkStyle = (path: string) => ({
-    textDecoration: 'none',
-    fontWeight: '600',
-    fontSize: '0.95rem',
-    color: location.pathname === path ? '#800020' : '#6b7280',
-    borderBottom: location.pathname === path ? '2px solid #800020' : '2px solid transparent',
-    paddingBottom: '4px',
-    transition: 'all 0.3s'
-  });
+  const navItem = (path: string, label: string, icon: string) => {
+    const isActive = location.pathname === path;
+    return (
+      <Link to={path} style={{
+        display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none',
+        padding: '8px 16px', borderRadius: '8px',
+        background: isActive ? '#eff6ff' : 'transparent',
+        color: isActive ? '#1e3a8a' : '#64748b',
+        fontWeight: isActive ? '600' : '500', transition: '0.2s'
+      }}>
+        <span dangerouslySetInnerHTML={{ __html: icon }} style={{ width: '18px', height: '18px' }} />
+        {label}
+      </Link>
+    );
+  };
+
+  // Novos Ícones minimalistas baseados nos links solicitados
+  const icons = {
+    home: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
+    profile: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+    account: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>`,
+    settings: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+    logout: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`
+  };
 
   return (
-    <header style={{ backgroundColor: '#ffffff', padding: '15px 0', borderBottom: '1px solid #e5e7eb', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        
-        <Link to="/dashboard" style={{ textDecoration: 'none' }}>
-          <Logo centered={false} />
-        </Link>
+    <header className="card" style={{ padding: '15px 25px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <Link to="/dashboard" style={{ textDecoration: 'none' }}><Logo /></Link>
+      
+      <nav style={{ display: 'flex', gap: '5px' }}>
+        {navItem('/dashboard', 'Página Principal', icons.home)}
+        {navItem('/profile', 'Meu Perfil', icons.profile)}
+        {navItem('/account', 'Segurança', icons.account)}
+        {navItem('/settings', 'Opções', icons.settings)}
+      </nav>
 
-        <nav style={{ display: 'flex', gap: '25px', alignItems: 'center' }}>
-          <Link to="/dashboard" style={navLinkStyle('/dashboard')}>Dashboard</Link>
-          <Link to="/quote" style={navLinkStyle('/quote')}>Cotações</Link>
-          <Link to="/swap" style={navLinkStyle('/swap')}>Conversão</Link>
-          <Link to="/statement" style={navLinkStyle('/statement')}>Extrato</Link>
-          
-          <button 
-            onClick={handleLogout} 
-            style={{ padding: '8px 16px', fontSize: '0.85rem', fontWeight: 'bold', backgroundColor: 'transparent', border: '1px solid #800020', borderRadius: '6px', color: '#800020', cursor: 'pointer', marginLeft: '10px' }}>
-            Sair
-          </button>
-        </nav>
-      </div>
+      <button onClick={handleLogout} style={{ background: 'transparent', border: 'none', color: '#64748b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: '500' }}>
+        <span dangerouslySetInnerHTML={{ __html: icons.logout }} style={{ width: '18px', height: '18px' }} /> Sair
+      </button>
     </header>
   );
 }

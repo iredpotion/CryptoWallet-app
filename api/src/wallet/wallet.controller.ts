@@ -1,10 +1,14 @@
 import { Controller, Get, Post, Body, UseGuards, Req, Query, DefaultValuePipe, ParseIntPipe } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { AuthGuard } from '@nestjs/passport';
+import { CryptoService } from './crypto.service'; // Ajuste o caminho se o CryptoService estiver em outra pasta
 
 @Controller('wallet')
 export class WalletController {
-  constructor(private readonly walletService: WalletService) {}
+  constructor(
+    private readonly walletService: WalletService,
+    private readonly cryptoService: CryptoService // <-- Injetando o CryptoService aqui
+  ) {}
 
   @Get()
   @UseGuards(AuthGuard('jwt'))
@@ -49,5 +53,11 @@ export class WalletController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
     return this.walletService.getStatement(req.user.userId, page, limit);
+  }
+
+  // NOVO: Endpoint do Mercado (Usado pela página de Swap para a Tabela)
+  @Get('market')
+  async getMarket() {
+    return this.cryptoService.getMarketData(['BTC', 'ETH', 'USDT']);
   }
 }
