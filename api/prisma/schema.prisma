@@ -1,4 +1,4 @@
-// Configuração do Banco de Dados
+// Configuração do Prisma Client e conexão com o banco de dados principal
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,38 +8,41 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo de Usuário
+// Gerencia os dados de autenticação e a identidade dos usuários na plataforma
 model User {
   id                 String   @id @default(uuid())
   email              String   @unique
   password           String
   hashedRefreshToken String?
   createdAt          DateTime @default(now())
+  
   wallet             Wallet?
 }
 
-// Carteira Digital
+// Representa a carteira do usuário, agrupando todos os seus ativos e histórico de transações
 model Wallet {
   id         String            @id @default(uuid())
   userId     String            @unique
   createdAt  DateTime          @default(now())
+  
   user       User              @relation(fields: [userId], references: [id])
   assets     WalletAsset[]
   statements WalletStatement[]
 }
 
-// Saldos por Token
+// Armazena o saldo atualizado de cada token específico dentro de uma carteira
 model WalletAsset {
   id       String  @id @default(uuid())
   walletId String
   token    String
   balance  Decimal @default(0) @db.Decimal(20, 8)
+  
   wallet   Wallet  @relation(fields: [walletId], references: [id])
 
   @@unique([walletId, token])
 }
 
-// Ledger de Movimentações
+// Registro imutável (ledger) de todas as movimentações financeiras para auditoria e histórico
 model WalletStatement {
   id            String   @id @default(uuid())
   walletId      String
@@ -49,10 +52,11 @@ model WalletStatement {
   balanceBefore Decimal  @db.Decimal(20, 8)
   balanceAfter  Decimal  @db.Decimal(20, 8)
   createdAt     DateTime @default(now())
+  
   wallet        Wallet   @relation(fields: [walletId], references: [id])
 }
 
-// Controle de Idempotencia
+// Registra requisições para garantir que operações sensíveis não sejam processadas em duplicidade
 model IdempotencyLog {
   key            String   @id
   method         String

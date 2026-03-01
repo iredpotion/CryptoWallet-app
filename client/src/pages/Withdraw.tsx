@@ -1,34 +1,35 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import api from '../services/api';
 import Layout from '../components/Layout';
-import Swal from 'sweetalert2';
 
+// Componente responsável por gerenciar a interface de retirada de fundos e validação de saldo
 export default function Withdraw() {
   const [wallet, setWallet] = useState<any>(null);
   const [amount, setAmount] = useState('');
   const [token, setToken] = useState('BRL');
   const navigate = useNavigate();
 
+  // Recupera os dados atualizados da carteira para exibir o saldo disponível por ativo
   useEffect(() => { 
     api.get('/wallet').then(res => setWallet(res.data)); 
   }, []);
 
+  // Processa a requisição de saque e gerencia os alertas de confirmação ou erro
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // 1. Payload Corrigido: Enviando apenas o que o Controller espera
       await api.post('/wallet/withdraw', { 
         token: token, 
         amount: Number(amount) 
       });
       
-      // 2. Await adicionado: Segura a tela até o usuário clicar em "OK"
       await Swal.fire({ 
         icon: 'success', 
         title: 'Sucesso', 
         text: 'Saque realizado com sucesso!',
-        confirmButtonColor: '#1e3a8a'
+        confirmButtonColor: '#0000FF'
       });
       
       navigate('/dashboard');
@@ -37,7 +38,7 @@ export default function Withdraw() {
         icon: 'error', 
         title: 'Falha no Saque', 
         text: err.response?.data?.message || 'Saldo insuficiente ou falha na transação.',
-        confirmButtonColor: '#1e3a8a'
+        confirmButtonColor: '#0000FF'
       });
     }
   };
@@ -56,7 +57,6 @@ export default function Withdraw() {
               <option value="ETH">Ethereum (ETH)</option>
             </select>
             
-            {/* Opcional: Mostra o saldo disponível para ajudar o usuário */}
             {wallet && (
                <span style={{ display: 'block', marginTop: '8px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
                  Disponível: {wallet.assets.find((a: any) => a.token === token)?.balance || '0'} {token}
@@ -66,7 +66,16 @@ export default function Withdraw() {
           
           <div>
             <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontWeight: '500' }}>Valor do Saque</label>
-            <input type="number" step="any" min="0.00000001" value={amount} onChange={(e) => setAmount(e.target.value)} required placeholder="0.00" className="input-field" />
+            <input 
+              type="number" 
+              step="any" 
+              min="0.00000001" 
+              value={amount} 
+              onChange={(e) => setAmount(e.target.value)} 
+              required 
+              placeholder="0.00" 
+              className="input-field" 
+            />
           </div>
           
           <button type="submit" className="btn-primary" style={{ marginTop: '10px' }}>

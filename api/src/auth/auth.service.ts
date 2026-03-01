@@ -1,9 +1,10 @@
 import { ForbiddenException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from 'src/users/users.service';
-import { WalletService } from 'src/wallet/wallet.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { UsersService } from 'src/users/users.service';
+import { WalletService } from 'src/wallet/wallet.service';
 
+// Serviço responsável por gerenciar a autenticação, emissão e validação de tokens JWT
 @Injectable()
 export class AuthService {
   constructor(
@@ -12,9 +13,10 @@ export class AuthService {
     private walletService: WalletService,
   ) {}
 
-  // 1. LOGIN (Agora retorna os dois tokens)
+  // Autentica o usuário validando suas credenciais e retorna os tokens de sessão
   async signIn(email: string, pass: string) {
     const user = await this.usersService.findByEmail(email);
+    
     if (!user || !(await bcrypt.compare(pass, user.password))) {
       throw new UnauthorizedException('Credenciais inválidas');
     }
@@ -25,7 +27,7 @@ export class AuthService {
     return tokens;
   }
 
-  // 2. CADASTRO (Também já loga o usuário retornando tokens)
+  // Registra um novo usuário, inicializa sua carteira digital e efetua o login inicial
   async register(email: string, pass: string) {
     const newUser = await this.usersService.create({ email, password: pass });
     await this.walletService.create(newUser.id);
@@ -36,21 +38,23 @@ export class AuthService {
     return tokens;
   }
 
-  // 3. LOGOUT (Remove o refresh token do banco)
+  // Invalida a sessão do usuário removendo o token de atualização armazenado
   async logout(userId: string) {
     await this.usersService.update(userId, { hashedRefreshToken: null });
   }
 
-  // 4. REFRESH (A lógica mágica de renovar)
+  // Emite um novo par de tokens caso o token de atualização fornecido seja válido
   async refreshTokens(userId: string, rt: string) {
     const user = await this.usersService.findById(userId);
-    if (!user || !user.hashedRefreshToken) 
+    
+    if (!user || !user.hashedRefreshToken) {
       throw new ForbiddenException('Acesso negado');
+    }
 
-    // Compara o Refresh Token enviado com o Hash no banco
     const rtMatches = await bcrypt.compare(rt, user.hashedRefreshToken);
-    if (!rtMatches) 
+    if (!rtMatches) {
       throw new ForbiddenException('Acesso negado');
+    }
 
     const tokens = await this.getTokens(user.id, user.email);
     await this.updateRefreshToken(user.id, tokens.refresh_token);
@@ -58,23 +62,19 @@ export class AuthService {
     return tokens;
   }
 
-  // --- MÉTODOS AUXILIARES ---
-
-  // Gera o Hash e salva no banco (Usamos o update do UsersService)
+  // Gera o hash do token de atualização e o persiste no perfil do usuário
   async updateRefreshToken(userId: string, rt: string) {
     const hash = await bcrypt.hash(rt, 10);
     await this.usersService.update(userId, { hashedRefreshToken: hash });
   }
 
-  // Gera o par de tokens JWT
+  // Cria os tokens JWT de acesso (curta duração) e de atualização (longa duração)
   async getTokens(userId: string, email: string) {
     const [at, rt] = await Promise.all([
-      // Access Token: Expira rápido (15 min)
       this.jwtService.signAsync(
         { sub: userId, email },
         { secret: 'SEGREDO_SUPER_SECRETO', expiresIn: '15m' },
       ),
-      // Refresh Token: Dura bastante (7 dias)
       this.jwtService.signAsync(
         { sub: userId, email },
         { secret: 'SEGREDO_SUPER_SECRETO', expiresIn: '7d' },

@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { PrivateRoute } from './components/PrivateRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -7,6 +8,7 @@ import Statement from './pages/Statement';
 import Deposit from './pages/Deposit';
 import Withdraw from './pages/Withdraw';
 
+// Gerencia a árvore de navegação aplicando o componente de segurança em rotas autenticadas
 export default function App() {
   return (
     <BrowserRouter>
@@ -15,11 +17,12 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         
-        <Route path="/dashboard" element={<Dashboard />} />        
-        <Route path="/swap" element={<Swap />} />      
-        <Route path="/statement" element={<Statement />} />
-        <Route path="/deposit" element={<Deposit />} />
-        <Route path="/withdraw" element={<Withdraw />} />
+        {/* Envolvendo rotas sensíveis com a proteção de autenticação */}
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />        
+        <Route path="/swap" element={<PrivateRoute><Swap /></PrivateRoute>} />      
+        <Route path="/statement" element={<PrivateRoute><Statement /></PrivateRoute>} />
+        <Route path="/deposit" element={<PrivateRoute><Deposit /></PrivateRoute>} />
+        <Route path="/withdraw" element={<PrivateRoute><Withdraw /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );

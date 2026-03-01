@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CryptoService } from './crypto.service';
 
+// Serviço responsável por gerenciar a lógica de negócios das carteiras, transações, saldos e histórico
 @Injectable()
 export class WalletService {
   constructor(
@@ -9,6 +10,7 @@ export class WalletService {
     private cryptoService: CryptoService
   ) {}
 
+  // Cria uma nova carteira digital para o usuário com saldos zerados para os tokens padrão suportados
   async create(userId: string) {
     return this.prisma.wallet.create({
       data: {
@@ -25,10 +27,12 @@ export class WalletService {
     });
   }
 
+  // Lista todas as carteiras e seus ativos correspondentes presentes no sistema
   async findAll() {
     return this.prisma.wallet.findMany({ include: { assets: true } });
   }
 
+  // Busca uma carteira específica pelo ID do usuário proprietário, incluindo seus ativos
   async findOne(userId: string) {
     return this.prisma.wallet.findUnique({
       where: { userId },
@@ -36,7 +40,7 @@ export class WalletService {
     });
   }
 
-  // Taxa de Transação
+  // Calcula a cotação estimada, taxas aplicáveis e o valor líquido para uma conversão de tokens
   async getSwapQuote(fromToken: string, toToken: string, amount: number) {
     const price = await this.cryptoService.getPrice(fromToken, toToken);
     const feePercentage = 0.015;
@@ -55,7 +59,7 @@ export class WalletService {
     };
   }
 
-  // Transação
+  // Processa uma transação de swap de forma atômica, atualizando saldos e registrando as movimentações
   async executeSwap(userId: string, fromToken: string, toToken: string, amount: number) {
     const quote = await this.getSwapQuote(fromToken, toToken, amount);
 
@@ -134,10 +138,9 @@ export class WalletService {
     });
   }
 
-  // SAQUE
+  // Efetua a retirada de fundos de um ativo específico da carteira de forma atômica
   async withdraw(userId: string, token: string, amount: number) {
     return this.prisma.$transaction(async (tx) => {
-      // 1. Buscar a carteira
       const wallet = await tx.wallet.findUnique({
         where: { userId },
         include: { assets: true },
@@ -145,26 +148,24 @@ export class WalletService {
 
       if (!wallet) throw new NotFoundException('Wallet not found');
 
-      // 2. Validar saldo
       const asset = wallet.assets.find((a) => a.token === token);
       if (!asset || Number(asset.balance) < amount) {
         throw new BadRequestException('Insufficient balance for withdrawal');
       }
 
-      // 3. Atualizar saldo (Debitar)
       const newBalance = Number(asset.balance) - amount;
+      
       await tx.walletAsset.update({
         where: { id: asset.id },
         data: { balance: newBalance },
       });
 
-      // 4. Registrar a transação de saque no Ledger
       const statement = await tx.walletStatement.create({
         data: {
           walletId: wallet.id,
           token,
-          type: 'WITHDRAWAL', // Requisito 55
-          amount: -amount, // Valor negativo pois é saída
+          type: 'WITHDRAWAL',
+          amount: -amount,
           balanceBefore: asset.balance,
           balanceAfter: newBalance,
         },
@@ -178,7 +179,7 @@ export class WalletService {
     });
   }
 
-  //EXTRATO / HISTÓRICO COM PAGINAÇÃO
+  // Retorna o histórico paginado de movimentações (extrato) de uma carteira
   async getStatement(userId: string, page: number = 1, limit: number = 10) {
     const wallet = await this.prisma.wallet.findUnique({
       where: { userId },
@@ -188,7 +189,6 @@ export class WalletService {
 
     const skip = (page - 1) * limit;
 
-    // Busca as movimentações paginadas e ordenadas pelas mais recentes
     const statements = await this.prisma.walletStatement.findMany({
       where: { walletId: wallet.id },
       skip,
@@ -196,7 +196,6 @@ export class WalletService {
       orderBy: { createdAt: 'desc' },
     });
 
-    // Conta o total de registros para informar no meta-dado da paginação
     const total = await this.prisma.walletStatement.count({
       where: { walletId: wallet.id },
     });

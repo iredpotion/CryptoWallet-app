@@ -1,23 +1,26 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Logo from './Logo';
 
+// Componente de cabeçalho da aplicação, gerenciando a navegação principal e o logout do usuário
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Encerra a sessão do usuário localmente e o redireciona para a tela de login
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
 
+  // Renderiza os links de navegação aplicando o azul marinho original para destacar a rota ativa
   const navItem = (path: string, label: string, icon: string) => {
     const isActive = location.pathname === path;
     return (
       <Link to={path} style={{
         display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none',
         padding: '8px 16px', borderRadius: '8px',
-        background: isActive ? '#eff6ff' : 'transparent',
-        color: isActive ? '#1e3a8a' : '#64748b',
+        background: isActive ? '#1e3a8a' : 'transparent',
+        color: isActive ? '#FFFFFF' : '#64748b',
         fontWeight: isActive ? '600' : '500', transition: '0.2s'
       }}>
         <span dangerouslySetInnerHTML={{ __html: icon }} style={{ width: '18px', height: '18px' }} />
@@ -26,7 +29,7 @@ export default function Header() {
     );
   };
 
-  // Novos Ícones minimalistas baseados nos links solicitados
+  // Dicionário de ícones SVG minimalistas utilizados no menu de navegação
   const icons = {
     home: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>`,
     profile: `<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,

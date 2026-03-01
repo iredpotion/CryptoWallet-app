@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// Componente visual do logotipo animado, com ícones e cores primárias originais elegantes
 export default function Logo({ centered = false }: { centered?: boolean }) {
   const [isHovered, setIsHovered] = useState(false);
   
-  // Cores atualizadas para o novo tema minimalista elegante
-  const primaryColor = '#1e3a8a'; // Azul escuro principal (combina com os botões)
-  const primaryDark = '#172554';  // Azul ainda mais escuro para o fundo da carteira (profundidade)
-  const textMain = '#0f172a';     // Grafite escuro para o texto principal
+  const primaryColor = '#1e3a8a'; 
+  const primaryDark = '#172554';  
+  const textMain = '#0f172a';     
 
   return (
     <div 
@@ -20,7 +20,6 @@ export default function Logo({ centered = false }: { centered?: boolean }) {
     >
       <div style={{ position: 'relative', width: '54px', height: '42px', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', overflow: 'visible' }}>
         
-        {/* Sensores de Conexão */}
         {[0, 90, 180, 270].map((deg, index) => (
           <motion.div key={`sensor-${deg}-${index}`} animate={{ opacity: isHovered ? 1 : 0.4, scale: isHovered ? 1.2 : 1 }}
             style={{
@@ -31,17 +30,19 @@ export default function Logo({ centered = false }: { centered?: boolean }) {
         ))}
 
         <AnimatePresence>
+          {/* Ícone dourado do Bitcoin */}
           <motion.div key="coin-btc"
             initial={{ y: 0, opacity: 1, rotate: -15 }} animate={{ y: isHovered ? 15 : 0, opacity: isHovered ? 0 : 1, rotate: -15 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             style={{
               position: 'absolute', top: '-8px', left: '8px', width: '22px', height: '22px',
-              backgroundColor: '#f59e0b', /* Laranja/Dourado do Bitcoin para dar destaque no tema clean */
+              backgroundColor: '#f59e0b', // Laranja Bitcoin original
               borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: '#fff', fontSize: '12px', fontWeight: 'bold', boxShadow: '0 2px 8px rgba(245, 158, 11, 0.3)', zIndex: 1
             }}
           >₿</motion.div>
 
+          {/* Ícone azul do Dólar */}
           <motion.div key="coin-usd"
             initial={{ y: 0, opacity: 1, rotate: 10 }} animate={{ y: isHovered ? 12 : 0, opacity: isHovered ? 0 : 1, rotate: 10 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.05 }}

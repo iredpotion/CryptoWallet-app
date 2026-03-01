@@ -1,45 +1,39 @@
-import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { DepositWebhookDto } from './dto/deposit-webhook.dto';
 
+// Serviço responsável por processar de forma segura as notificações e eventos de sistemas externos
 @Injectable()
 export class WebhookService {
   constructor(private prisma: PrismaService) {}
 
+  // Processa depósitos garantindo a idempotência da requisição, validando os dados e atualizando saldos de forma atômica
   async processDeposit(dto: DepositWebhookDto) {
     const { userId, token, amount, idempotencyKey } = dto;
 
-    // 1. Verificar Idempotência 
     const existingKey = await this.prisma.idempotencyLog.findUnique({
       where: { key: idempotencyKey },
     });
 
     if (existingKey) {
-      // Se já processou, retorna sucesso (200) ou erro (409) dependendo da regra de negócio.
-      // Geralmente em webhooks, se já foi processado com sucesso, retornamos 200 novamente.
       return { message: 'Transaction already processed', status: 'skipped' };
     }
 
-    // 2. Buscar Carteira do Usuário
     const wallet = await this.prisma.wallet.findUnique({
       where: { userId },
       include: { assets: true },
     });
 
     if (!wallet) {
-      throw new BadRequestException('Wallet not found for this user'); // 
+      throw new BadRequestException('Wallet not found for this user');
     }
 
-    // Validar Tokens permitidos (BRL, BTC, ETH) [cite: 24]
     const allowedTokens = ['BRL', 'BTC', 'ETH'];
     if (!allowedTokens.includes(token)) {
-      throw new BadRequestException(`Token ${token} not supported`); // 
+      throw new BadRequestException(`Token ${token} not supported`);
     }
 
-    // 3. Executar Transação Atômica (Balance + Ledger + Idempotency)
     await this.prisma.$transaction(async (tx) => {
-      
-      // A. Buscar ou Criar o Asset (ex: saldo de BTC)
       let asset = await tx.walletAsset.findUnique({
         where: {
           walletId_token: { walletId: wallet.id, token },
@@ -53,15 +47,13 @@ export class WebhookService {
       }
 
       const oldBalance = asset.balance;
-      const newBalance = Number(oldBalance) + amount; // Cuidado com precisão JS em produção real
+      const newBalance = Number(oldBalance) + amount;
 
-      // B. Atualizar Saldo [cite: 34]
       await tx.walletAsset.update({
         where: { id: asset.id },
         data: { balance: newBalance },
       });
 
-      // C. Criar Registro no Ledger (Movimentação) [cite: 54, 55, 56]
       await tx.walletStatement.create({
         data: {
           walletId: wallet.id,
@@ -73,7 +65,6 @@ export class WebhookService {
         },
       });
 
-      // D. Salvar Idempotency Key
       await tx.idempotencyLog.create({
         data: {
           key: idempotencyKey,
