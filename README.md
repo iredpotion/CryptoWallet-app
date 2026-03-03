@@ -57,13 +57,16 @@ graph TD
     FetchCoinGecko --> APICoinGecko[API CoinGecko]:::ext
     APICoinGecko -.-> Cache
 
-    %% Execução de Swap
-    ActionSwap --> APISwap[POST /wallet/swap]:::api
-    APISwap --> ACID[Transação Atómica ACID]:::sys
-    ACID --> ValidaSaldo{Validar Saldo}:::sys
-    ValidaSaldo -- OK --> CobrarTaxa[Debitar 1.5% Taxa]:::sys
-    CobrarTaxa --> DBWallet
-    CobrarTaxa --> DBLedger[(Tabela Ledger)]:::db
+    %% Execução de Swap & Cotação
+    ActionSwap --> APIQuote[GET /wallet/swap/quote]:::api
+    APIQuote --> APICoinGecko
+    APIQuote -- Retorna Taxa e Preço --> ActionSwap
+    ActionSwap --> APISwap[POST /wallet/swap]:::api
+    APISwap --> ACID[Transação Atómica ACID]:::sys
+    ACID --> ValidaSaldo{Validar Saldo}:::sys
+    ValidaSaldo -- OK --> CobrarTaxa[Debitar 1.5% Taxa]:::sys
+    CobrarTaxa --> DBWallet
+    CobrarTaxa --> DBLedger[(Tabela Ledger)]:::db
 
     %% Webhook de Depósito
     Webhook((Webhook Externo)):::ext --> APIDeposit[POST /webhooks/deposit]:::api
@@ -97,11 +100,18 @@ Você vai precisar apenas do Node.js e de uma base de dados PostgreSQL rodando l
 
 Passo 1: A Base de Dados
 
-- Na pasta do Backend, crie um ficheiro .env (pode copiar o .env.example) e coloque o URL do seu Postgres e um segredo para o JWT:
+- Na pasta do Backend, crie um ficheiro .env (pode copiar o .env.example) e configure as variáveis:
+
 ```
 DATABASE_URL="postgresql://usuario:senha@localhost:5432/cryptowallet?schema=public"
 JWT_SECRET="um_segredo_qualquer_aqui"
 ```
+- Para subir a base de dados em segundos, basta utilizar o ficheiro docker-compose.yml incluído no projeto. No terminal, execute:
+```
+docker compose up -d
+```
+(Se preferir não usar containers, certifique-se de ter um PostgreSQL rodando localmente na porta 5432 com as credenciais do seu .env).
+
 
 Passo 2: Rodar a API (NestJS)
 
@@ -143,7 +153,8 @@ O painel vai abrir no seu navegador (geralmente em http://localhost:5173). Pode 
 | **POST** | `/auth/login`        | Autentica o utilizador e retorna o token JWT.                             |
 | **GET**  | `/wallet`            | Retorna o resumo da carteira do utilizador autenticado.                   |
 | **GET**  | `/wallet/market`     | Retorna as cotações das moedas via CoinGecko utilizando cache interno.    |
-| **POST** | `/wallet/swap`       | Realiza a troca entre moedas, aplicando taxa de 1,5% automaticamente.     |
+| **GET**  | `/wallet/swap/quote` | Simula a conversão, exibindo as taxas aplicadas (1.5%) e o valor final.   |
+| **POST** | `/wallet/swap`       | Realiza a troca entre moedas, validando saldos e gerando os registros.    |
 | **POST** | `/wallet/withdraw`   | Realiza o saque de saldo da carteira.                                     |
 | **GET**  | `/wallet/statement`  | Retorna o extrato da carteira com paginação (`?page=1&limit=10`).         |
 | **POST** | `/webhooks/deposit`  | Simula a entrada de um depósito externo com validação de idempotência.    |

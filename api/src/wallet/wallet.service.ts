@@ -8,7 +8,7 @@ export class WalletService {
   constructor(
     private prisma: PrismaService,
     private cryptoService: CryptoService
-  ) {}
+  ) { }
 
   // Cria uma nova carteira digital para o usuário com saldos zerados para os tokens padrão suportados
   async create(userId: string) {
@@ -61,9 +61,11 @@ export class WalletService {
 
   // Processa uma transação de swap de forma atômica, atualizando saldos e registrando as movimentações
   async executeSwap(userId: string, fromToken: string, toToken: string, amount: number) {
-    const quote = await this.getSwapQuote(fromToken, toToken, amount);
-
     return this.prisma.$transaction(async (tx) => {
+      // CORREÇÃO CRÍTICA: A cotação foi movida para DENTRO da transação.
+      // Isso amarra o preço exato ao momento da execução no banco (evita TOCTOU).
+      const quote = await this.getSwapQuote(fromToken, toToken, amount);
+
       const wallet = await tx.wallet.findUnique({
         where: { userId },
         include: { assets: true },
@@ -154,7 +156,7 @@ export class WalletService {
       }
 
       const newBalance = Number(asset.balance) - amount;
-      
+
       await tx.walletAsset.update({
         where: { id: asset.id },
         data: { balance: newBalance },
