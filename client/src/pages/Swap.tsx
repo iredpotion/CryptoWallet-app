@@ -12,6 +12,7 @@ export default function Swap() {
   const [estimatedOutput, setEstimatedOutput] = useState<number>(0);
   const [isQuoting, setIsQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
+  const [isSwapping, setIsSwapping] = useState(false); // NOVO: Controla a execução da troca
 
   const [marketData, setMarketData] = useState([
     { id: 'BTC', name: 'Bitcoin', symbol: 'BTC', priceBRL: 0, change1h: 0, color: '#f59e0b' },
@@ -72,7 +73,7 @@ export default function Swap() {
 
   const handleExecuteSwap = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || Number(amount) <= 0 || quoteError) return;
+    if (!amount || Number(amount) <= 0 || quoteError || isSwapping) return;
 
     const confirmResult = await Swal.fire({
       title: 'Confirmar Conversão',
@@ -86,12 +87,14 @@ export default function Swap() {
     });
 
     if (confirmResult.isConfirmed) {
+      setIsSwapping(true); // Trava os botões após confirmar no modal
       try {
         await api.post('/wallet/swap', { from: fromToken, to: toToken, amount: Number(amount) });
         Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Sua conversão foi realizada com sucesso.', confirmButtonColor: '#1e3a8a' });
         navigate('/dashboard');
       } catch (error: any) {
         Swal.fire({ icon: 'error', title: 'Falha na Conversão', text: error.response?.data?.message || 'Saldo insuficiente ou erro.', confirmButtonColor: '#1e3a8a' });
+        setIsSwapping(false); // Libera em caso de erro
       }
     }
   };
@@ -100,6 +103,8 @@ export default function Swap() {
     up: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 4l-8 8h16l-8-8z"></path></svg>`,
     down: `<svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 20l8-8H4l8 8z"></path></svg>`
   };
+
+  const isButtonDisabled = isQuoting || !!quoteError || isSwapping;
 
   return (
     <Layout>
@@ -151,7 +156,7 @@ export default function Swap() {
           <form onSubmit={handleExecuteSwap} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
               <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '500' }}>Vender</label>
-              <select value={fromToken} onChange={(e) => setFromToken(e.target.value)} className="input-field">
+              <select value={fromToken} onChange={(e) => setFromToken(e.target.value)} className="input-field" disabled={isSwapping}>
                 <option value="BRL">BRL (Real)</option>
                 <option value="BTC">BTC (Bitcoin)</option>
                 <option value="ETH">ETH (Ethereum)</option>
@@ -160,7 +165,7 @@ export default function Swap() {
             </div>
             <div>
               <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '500' }}>Comprar</label>
-              <select value={toToken} onChange={(e) => setToToken(e.target.value)} className="input-field">
+              <select value={toToken} onChange={(e) => setToToken(e.target.value)} className="input-field" disabled={isSwapping}>
                 <option value="BTC">BTC (Bitcoin)</option>
                 <option value="ETH">ETH (Ethereum)</option>
                 <option value="USDT">USDT (Tether)</option>
@@ -169,7 +174,7 @@ export default function Swap() {
             </div>
             <div>
               <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '500' }}>Quantidade</label>
-              <input type="number" step="any" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="input-field" />
+              <input type="number" step="any" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="input-field" disabled={isSwapping} />
             </div>
 
             <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px dashed var(--border)', textAlign: 'center' }}>
@@ -183,8 +188,17 @@ export default function Swap() {
               )}
             </div>
 
-            <button type="submit" className="btn-primary" style={{ marginTop: '10px' }} disabled={isQuoting || !!quoteError}>
-              Executar Conversão
+            <button 
+              type="submit" 
+              className="btn-primary" 
+              disabled={isButtonDisabled}
+              style={{ 
+                marginTop: '10px',
+                opacity: isButtonDisabled ? 0.7 : 1, 
+                cursor: isButtonDisabled ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {isSwapping ? 'Convertendo...' : 'Executar Conversão'}
             </button>
           </form>
         </div>
