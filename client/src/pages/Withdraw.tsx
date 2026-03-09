@@ -8,7 +8,7 @@ export default function Withdraw() {
   const [wallet, setWallet] = useState<any>(null);
   const [amount, setAmount] = useState('');
   const [token, setToken] = useState('BRL');
-  const [isLoading, setIsLoading] = useState(false); // NOVO: Estado de loading
+  const [isLoading, setIsLoading] = useState(false); 
   const navigate = useNavigate();
 
   useEffect(() => { 
@@ -17,7 +17,7 @@ export default function Withdraw() {
 
   const handleWithdraw = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return; // Trava o duplo clique
+    if (isLoading) return; 
 
     setIsLoading(true);
     try {
@@ -41,14 +41,14 @@ export default function Withdraw() {
         text: err.response?.data?.message || 'Saldo insuficiente ou falha na transação.',
         confirmButtonColor: '#0000FF'
       });
-      setIsLoading(false); // Libera o botão em caso de erro
+      setIsLoading(false); 
     }
   };
 
   return (
     <Layout>
       <div style={{ padding: '0 15px' }}>
-        <div className="card" style={{ width: '100%', maxWidth: '500px', margin: '40px auto', padding: 'clamp(20px, 5vw, 40px)', boxSizing: 'border-box' }}>
+        <div className="card form-container">
           <h2 style={{ marginBottom: '30px', textAlign: 'center', color: 'var(--text-main)' }}>Sacar Fundos</h2>
           
           <form onSubmit={handleWithdraw} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

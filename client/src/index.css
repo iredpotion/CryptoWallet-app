@@ -1,6 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* Define a paleta de cores primárias e tokens de design para consistência em toda a interface */
+/* =========================================
+   1. Variáveis Globais (Design Tokens)
+   ========================================= */
 :root {
   --bg-body: #f4f6f8;
   --bg-card: #ffffff;
@@ -12,7 +14,9 @@
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.04);
 }
 
-/* Aplica o reset básico e a tipografia padrão para todos os elementos do sistema */
+/* =========================================
+   2. Reset e Tipografia Base
+   ========================================= */
 * { 
   box-sizing: border-box; 
   margin: 0; 
@@ -20,21 +24,21 @@
   font-family: 'Inter', sans-serif; 
 }
 
-/* Configura o comportamento do corpo da página e a cor de fundo estrutural */
 body { 
   background-color: var(--bg-body); 
   color: var(--text-main); 
   min-height: 100vh; 
 }
 
-/* Centraliza e limita a largura do conteúdo principal para garantir legibilidade */
 .app-container { 
   max-width: 1100px; 
   margin: 0 auto; 
   padding: 20px; 
 }
 
-/* Estiliza os cartões de interface com bordas arredondadas e sombras suaves para profundidade */
+/* =========================================
+   3. Componentes Globais (Cards, Inputs, Botões)
+   ========================================= */
 .card {
   background: var(--bg-card);
   border-radius: 20px;
@@ -42,7 +46,6 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-/* Padroniza os campos de entrada de texto com foco interativo na cor primária */
 .input-field {
   width: 100%; 
   padding: 14px; 
@@ -60,7 +63,6 @@ body {
   background: #fff; 
 }
 
-/* Define o estilo do botão de ação principal utilizando a cor azul primária */
 .btn-primary {
   background: var(--primary); 
   color: white; 
@@ -77,12 +79,11 @@ body {
   text-decoration: none;
 }
 
-.btn-primary:hover { 
+.btn-primary:hover:not(:disabled) { 
   background: var(--primary-hover); 
   transform: translateY(-1px); 
 }
 
-/* Define o estilo do botão secundário com bordas e cores neutras */
 .btn-outline {
   background: transparent; 
   color: var(--text-main); 
@@ -99,7 +100,104 @@ body {
   text-decoration: none;
 }
 
-.btn-outline:hover { 
+.btn-outline:hover:not(:disabled) { 
   background: #f8fafc; 
   border-color: #cbd5e1; 
+}
+
+/* =========================================
+   4. Classes de Layout e Responsividade (NOVO)
+   ========================================= */
+
+/* Dashboard Header (Saldo e Botões) */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  padding: 40px;
+  margin-bottom: 30px;
+}
+
+.dashboard-header-title h1 {
+  font-size: 3rem;
+  margin: 0;
+  word-break: break-all;
+}
+
+.action-buttons-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Grid de Ativos (Cards de Cripto) */
+.assets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* Tela de Swap (Tabela e Formulário) */
+.swap-container {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+/* Tabelas Responsivas (Para dar scroll horizontal apenas na tabela) */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+  width: 100%;
+  min-width: 500px; 
+  border-collapse: collapse;
+}
+
+/* Formulários Centralizados (Deposit / Withdraw) */
+.form-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 40px;
+  box-sizing: border-box;
+}
+
+/* =========================================
+   5. Media Queries (Ajustes para Celulares)
+   ========================================= */
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .dashboard-header-title h1 {
+    font-size: 2.2rem;
+  }
+
+  .action-buttons-grid {
+    max-width: 100%;
+  }
+
+  .swap-container {
+    grid-template-columns: 1fr; /* Coloca a tabela e o form um embaixo do outro */
+  }
+
+  .card {
+    padding: 20px !important; /* Reduz o respiro interno nos celulares */
+  }
+
+  .form-container {
+    margin: 20px auto;
+    padding: 25px !important;
+  }
 }

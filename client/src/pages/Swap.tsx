@@ -12,7 +12,7 @@ export default function Swap() {
   const [estimatedOutput, setEstimatedOutput] = useState<number>(0);
   const [isQuoting, setIsQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState<string | null>(null);
-  const [isSwapping, setIsSwapping] = useState(false); // NOVO: Controla a execução da troca
+  const [isSwapping, setIsSwapping] = useState(false);
 
   const [marketData, setMarketData] = useState([
     { id: 'BTC', name: 'Bitcoin', symbol: 'BTC', priceBRL: 0, change1h: 0, color: '#f59e0b' },
@@ -87,14 +87,14 @@ export default function Swap() {
     });
 
     if (confirmResult.isConfirmed) {
-      setIsSwapping(true); // Trava os botões após confirmar no modal
+      setIsSwapping(true); 
       try {
         await api.post('/wallet/swap', { from: fromToken, to: toToken, amount: Number(amount) });
         Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Sua conversão foi realizada com sucesso.', confirmButtonColor: '#1e3a8a' });
         navigate('/dashboard');
       } catch (error: any) {
         Swal.fire({ icon: 'error', title: 'Falha na Conversão', text: error.response?.data?.message || 'Saldo insuficiente ou erro.', confirmButtonColor: '#1e3a8a' });
-        setIsSwapping(false); // Libera em caso de erro
+        setIsSwapping(false); 
       }
     }
   };
@@ -108,13 +108,12 @@ export default function Swap() {
 
   return (
     <Layout>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', alignItems: 'flex-start' }}>
+      <div className="swap-container">
 
-        {/* Tabela de Mercado */}
-        <div className="card" style={{ padding: 'clamp(20px, 4vw, 30px)', overflowX: 'auto', flex: '1 1 400px', minWidth: 0 }}>
+        <div className="card">
           <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)', marginBottom: '20px' }}>Cotação Atual (BRL)</h2>
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '400px' }}>
+          <div className="table-responsive">
+            <table>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>#</th>
@@ -150,8 +149,7 @@ export default function Swap() {
           </div>
         </div>
 
-        {/* Formulário de Conversão */}
-        <div className="card" style={{ padding: 'clamp(20px, 4vw, 30px)', flex: '1 1 300px' }}>
+        <div className="card">
           <h2 style={{ fontSize: '1.2rem', marginBottom: '25px', color: 'var(--text-main)' }}>Converter Ativos</h2>
           <form onSubmit={handleExecuteSwap} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
@@ -159,7 +157,7 @@ export default function Swap() {
               <select value={fromToken} onChange={(e) => setFromToken(e.target.value)} className="input-field" disabled={isSwapping}>
                 <option value="BRL">BRL (Real)</option>
                 <option value="BTC">BTC (Bitcoin)</option>
-                <option value="ETH">ETH (Ethereum)</option>
+                <option value="ETH">Ethereum (ETH)</option>
                 <option value="USDT">USDT (Tether)</option>
               </select>
             </div>
@@ -167,7 +165,7 @@ export default function Swap() {
               <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '500' }}>Comprar</label>
               <select value={toToken} onChange={(e) => setToToken(e.target.value)} className="input-field" disabled={isSwapping}>
                 <option value="BTC">BTC (Bitcoin)</option>
-                <option value="ETH">ETH (Ethereum)</option>
+                <option value="ETH">Ethereum (ETH)</option>
                 <option value="USDT">USDT (Tether)</option>
                 <option value="BRL">BRL (Real)</option>
               </select>

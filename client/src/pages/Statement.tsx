@@ -12,11 +12,11 @@ export default function Statement() {
   return (
     <Layout>
       <div style={{ padding: '0 15px' }}>
-        <div className="card" style={{ padding: 'clamp(20px, 5vw, 40px)' }}>
+        <div className="card">
           <h2 style={{ marginBottom: '30px', color: 'var(--text-main)' }}>Histórico de Transações</h2>
           
-          <div style={{ overflowX: 'auto', width: '100%' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '400px' }}>
+          <div className="table-responsive">
+            <table>
               <thead>
                 <tr style={{ borderBottom: '2px solid var(--border)' }}>
                   <th style={{ padding: '15px', color: 'var(--text-muted)' }}>Data</th>

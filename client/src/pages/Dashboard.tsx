@@ -55,19 +55,20 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="card" style={{ padding: 'clamp(20px, 4vw, 40px)', display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
-        <div>
+      <div className="card dashboard-header">
+        <div className="dashboard-header-title">
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
             <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Saldo Total:</p>
             <button onClick={() => setShowBalance(!showBalance)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}>
               <span dangerouslySetInnerHTML={{ __html: showBalance ? icons.eye : icons.eyeOff }} style={{ width: '18px', height: '18px' }} />
             </button>
           </div>
-          <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 5vw, 3rem)', color: 'var(--text-main)', fontWeight: '800', filter: blurFilter, transition: 'filter 0.3s ease', wordBreak: 'break-all' }}>
+          <h1 style={{ color: 'var(--text-main)', fontWeight: '800', filter: blurFilter, transition: 'filter 0.3s ease' }}>
             R$ {totalBalanceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </h1>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px', width: '100%', maxWidth: '400px' }}>
+        
+        <div className="action-buttons-grid">
           <Link to="/deposit" className="btn-primary"><span dangerouslySetInnerHTML={{ __html: icons.dep }} style={{width: '18px'}} /> Depositar</Link>
           <Link to="/withdraw" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.sac }} style={{width: '18px'}} /> Sacar</Link>
           <Link to="/swap" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.trans }} style={{width: '18px'}} /> Swap</Link>
@@ -75,7 +76,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+      <div className="assets-grid">
         {wallet.assets.map((asset: any) => {
           const brand = getCryptoBrand(asset.token);
           const marketInfo = marketData.find(m => m.symbol === asset.token);
@@ -88,12 +89,7 @@ export default function Dashboard() {
             <div key={asset.id} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '200px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ 
-                    width: '32px', height: '32px', borderRadius: '50%', 
-                    background: brand.color, color: '#fff', 
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                    fontWeight: 'bold', fontSize: '0.8rem' 
-                  }}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: brand.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem' }}>
                     {asset.token.charAt(0)}
                   </div>
                   <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>{brand.name}</h3>
