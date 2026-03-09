@@ -118,13 +118,16 @@ Passo 2: Rodar a API (NestJS)
 - No terminal, dentro da pasta do backend (/api):
 
 ```
-# Instalar dependências
+# 1. Instalar as dependências
 npm install
 
-# Criar as tabelas na sua base de dados
-npx prisma migrate dev --name init
+# 2. Criar as tabelas no banco de dados (este comando também gera o Prisma Client)
+npx prisma migrate dev
 
-# Iniciar a API!
+# Observação: Se o banco já estiver populado e você precisar apenas gerar o Prisma Client, rode:
+# npx prisma generate
+
+# 3. Iniciar a API!
 npm run start:dev
 
 ```
