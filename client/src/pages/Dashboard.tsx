@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import Layout from '../components/Layout';
 
-// Painel principal com listagem de ativos utilizando a mesma identidade visual do módulo de Swap
 export default function Dashboard() {
   const [wallet, setWallet] = useState<any>(null);
   const [marketData, setMarketData] = useState<any[]>([]);
@@ -34,7 +33,6 @@ export default function Dashboard() {
     return acc + (Number(asset.balance) * price);
   }, 0);
 
-  // Configuração de cores e nomes idêntica ao componente de Swap
   const getCryptoBrand = (token: string) => {
     if (token === 'BTC') return { color: '#f59e0b', name: 'Bitcoin' };
     if (token === 'ETH') return { color: '#6366f1', name: 'Ethereum' };
@@ -57,7 +55,7 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="card" style={{ padding: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+      <div className="card" style={{ padding: 'clamp(20px, 4vw, 40px)', display: 'flex', flexWrap: 'wrap', gap: '20px', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
             <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Saldo Total:</p>
@@ -65,11 +63,11 @@ export default function Dashboard() {
               <span dangerouslySetInnerHTML={{ __html: showBalance ? icons.eye : icons.eyeOff }} style={{ width: '18px', height: '18px' }} />
             </button>
           </div>
-          <h1 style={{ margin: 0, fontSize: '3rem', color: 'var(--text-main)', fontWeight: '800', filter: blurFilter, transition: 'filter 0.3s ease' }}>
+          <h1 style={{ margin: 0, fontSize: 'clamp(2rem, 5vw, 3rem)', color: 'var(--text-main)', fontWeight: '800', filter: blurFilter, transition: 'filter 0.3s ease', wordBreak: 'break-all' }}>
             R$ {totalBalanceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </h1>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', width: '380px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '15px', width: '100%', maxWidth: '400px' }}>
           <Link to="/deposit" className="btn-primary"><span dangerouslySetInnerHTML={{ __html: icons.dep }} style={{width: '18px'}} /> Depositar</Link>
           <Link to="/withdraw" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.sac }} style={{width: '18px'}} /> Sacar</Link>
           <Link to="/swap" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.trans }} style={{width: '18px'}} /> Swap</Link>
@@ -90,7 +88,6 @@ export default function Dashboard() {
             <div key={asset.id} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '200px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  {/* Ícone circular igual ao Swap */}
                   <div style={{ 
                     width: '32px', height: '32px', borderRadius: '50%', 
                     background: brand.color, color: '#fff', 

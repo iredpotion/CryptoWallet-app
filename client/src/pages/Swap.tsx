@@ -11,7 +11,6 @@ export default function Swap() {
 
   const [estimatedOutput, setEstimatedOutput] = useState<number>(0);
   const [isQuoting, setIsQuoting] = useState(false);
-  // NOVO: Estado para capturar erros da API na hora de cotar
   const [quoteError, setQuoteError] = useState<string | null>(null);
 
   const [marketData, setMarketData] = useState([
@@ -40,7 +39,6 @@ export default function Swap() {
     return () => clearInterval(intervalId);
   }, []);
 
-  // Busca a cotação e trata erros
   useEffect(() => {
     const getQuote = async () => {
       const numAmount = Number(amount);
@@ -51,20 +49,11 @@ export default function Swap() {
       }
 
       setIsQuoting(true);
-      setQuoteError(null); // Limpa erros passados
+      setQuoteError(null);
       try {
         const res = await api.get(`/wallet/swap/quote?from=${fromToken}&to=${toToken}&amount=${numAmount}`);
-
-        // CORREÇÃO AQUI: Tenta acessar o valor de forma segura.
-        // Se res.data.swap existir, ele pega de lá. Se não, tenta pegar direto da raiz (res.data).
         const finalValue = res.data?.swap?.estimatedOutput ?? res.data?.estimatedOutput ?? res.data?.amount ?? 0;
-
-        if (finalValue === 0 && res.data) {
-          console.warn("Backend retornou sucesso, mas não encontrei o estimatedOutput. Resposta:", res.data);
-        }
-
         setEstimatedOutput(finalValue);
-
       } catch (error: any) {
         console.error("Erro ao buscar cotação", error);
         setEstimatedOutput(0);
@@ -102,7 +91,7 @@ export default function Swap() {
         Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Sua conversão foi realizada com sucesso.', confirmButtonColor: '#1e3a8a' });
         navigate('/dashboard');
       } catch (error: any) {
-        Swal.fire({ icon: 'error', title: 'Falha na Conversão', text: error.response?.data?.message || 'Saldo insuficiente ou erro na comunicação.', confirmButtonColor: '#1e3a8a' });
+        Swal.fire({ icon: 'error', title: 'Falha na Conversão', text: error.response?.data?.message || 'Saldo insuficiente ou erro.', confirmButtonColor: '#1e3a8a' });
       }
     }
   };
@@ -114,48 +103,50 @@ export default function Swap() {
 
   return (
     <Layout>
-      <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '30px', alignItems: 'start' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', alignItems: 'flex-start' }}>
 
         {/* Tabela de Mercado */}
-        <div className="card" style={{ padding: '30px', overflowX: 'auto' }}>
+        <div className="card" style={{ padding: 'clamp(20px, 4vw, 30px)', overflowX: 'auto', flex: '1 1 400px', minWidth: 0 }}>
           <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)', marginBottom: '20px' }}>Cotação Atual (BRL)</h2>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>#</th>
-                <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>Coin</th>
-                <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>Valor em BRL</th>
-                <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>1h</th>
-              </tr>
-            </thead>
-            <tbody>
-              {marketData.map((coin, index) => (
-                <tr key={coin.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '16px 10px', color: 'var(--text-muted)' }}>{index + 1}</td>
-                  <td style={{ padding: '16px 10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: coin.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.75rem' }}>{coin.symbol.charAt(0)}</div>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontWeight: '600', color: 'var(--text-main)', fontSize: '0.95rem' }}>{coin.name}</span>
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>{coin.symbol}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td style={{ padding: '16px 10px', fontWeight: '700', color: 'var(--text-main)' }}>R$ {coin.priceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                  <td style={{ padding: '16px 10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: coin.change1h >= 0 ? '#10b981' : '#e11d48', fontWeight: '700', fontSize: '0.9rem' }}>
-                      <span dangerouslySetInnerHTML={{ __html: coin.change1h >= 0 ? icons.up : icons.down }} />
-                      {Math.abs(coin.change1h).toFixed(2)}%
-                    </div>
-                  </td>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '400px' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                  <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>#</th>
+                  <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>Coin</th>
+                  <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>Valor em BRL</th>
+                  <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>1h</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {marketData.map((coin, index) => (
+                  <tr key={coin.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '16px 10px', color: 'var(--text-muted)' }}>{index + 1}</td>
+                    <td style={{ padding: '16px 10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: coin.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.75rem' }}>{coin.symbol.charAt(0)}</div>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontWeight: '600', color: 'var(--text-main)', fontSize: '0.95rem' }}>{coin.name}</span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: '600' }}>{coin.symbol}</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ padding: '16px 10px', fontWeight: '700', color: 'var(--text-main)' }}>R$ {coin.priceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td style={{ padding: '16px 10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: coin.change1h >= 0 ? '#10b981' : '#e11d48', fontWeight: '700', fontSize: '0.9rem' }}>
+                        <span dangerouslySetInnerHTML={{ __html: coin.change1h >= 0 ? icons.up : icons.down }} />
+                        {Math.abs(coin.change1h).toFixed(2)}%
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Formulário de Conversão */}
-        <div className="card" style={{ padding: '30px' }}>
+        <div className="card" style={{ padding: 'clamp(20px, 4vw, 30px)', flex: '1 1 300px' }}>
           <h2 style={{ fontSize: '1.2rem', marginBottom: '25px', color: 'var(--text-main)' }}>Converter Ativos</h2>
           <form onSubmit={handleExecuteSwap} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
@@ -183,18 +174,13 @@ export default function Swap() {
 
             <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px dashed var(--border)', textAlign: 'center' }}>
               <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Você receberá aproximadamente:</p>
-
-              {/* NOVO: Exibe o erro ao invés de 0 BTC */}
               {quoteError ? (
-                <p style={{ margin: '5px 0 0 0', color: '#e11d48', fontSize: '1rem', fontWeight: '600' }}>
-                  {quoteError}
-                </p>
+                <p style={{ margin: '5px 0 0 0', color: '#e11d48', fontSize: '1rem', fontWeight: '600' }}>{quoteError}</p>
               ) : (
                 <h3 style={{ margin: '5px 0 0 0', color: 'var(--primary)', fontSize: '1.2rem', fontWeight: '800' }}>
                   {isQuoting ? 'Calculando...' : `${estimatedOutput.toLocaleString('pt-BR', { maximumFractionDigits: 8 })} ${toToken}`}
                 </h3>
               )}
-
             </div>
 
             <button type="submit" className="btn-primary" style={{ marginTop: '10px' }} disabled={isQuoting || !!quoteError}>
@@ -202,6 +188,7 @@ export default function Swap() {
             </button>
           </form>
         </div>
+
       </div>
     </Layout>
   );
