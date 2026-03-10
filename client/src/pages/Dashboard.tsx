@@ -57,22 +57,22 @@ export default function Dashboard() {
     <Layout>
       <div className="card dashboard-header">
         <div className="dashboard-header-title">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-            <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Saldo Total:</p>
+          <div className="balance-label-wrapper">
+            <p className="balance-label">Saldo Total:</p>
             <button onClick={() => setShowBalance(!showBalance)} style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex' }}>
               <span dangerouslySetInnerHTML={{ __html: showBalance ? icons.eye : icons.eyeOff }} style={{ width: '18px', height: '18px' }} />
             </button>
           </div>
-          <h1 style={{ color: 'var(--text-main)', fontWeight: '800', filter: blurFilter, transition: 'filter 0.3s ease' }}>
+          <h1 style={{ filter: blurFilter }}>
             R$ {totalBalanceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
           </h1>
         </div>
-        
+
         <div className="action-buttons-grid">
-          <Link to="/deposit" className="btn-primary"><span dangerouslySetInnerHTML={{ __html: icons.dep }} style={{width: '18px'}} /> Depositar</Link>
-          <Link to="/withdraw" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.sac }} style={{width: '18px'}} /> Sacar</Link>
-          <Link to="/swap" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.trans }} style={{width: '18px'}} /> Swap</Link>
-          <Link to="/statement" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.hist }} style={{width: '18px'}} /> Histórico</Link>
+          <Link to="/deposit" className="btn-primary"><span dangerouslySetInnerHTML={{ __html: icons.dep }} style={{ width: '18px' }} /> Depositar</Link>
+          <Link to="/withdraw" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.sac }} style={{ width: '18px' }} /> Sacar</Link>
+          <Link to="/swap" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.trans }} style={{ width: '18px' }} /> Swap</Link>
+          <Link to="/statement" className="btn-outline"><span dangerouslySetInnerHTML={{ __html: icons.hist }} style={{ width: '18px' }} /> Histórico</Link>
         </div>
       </div>
 
@@ -84,34 +84,34 @@ export default function Dashboard() {
           const change1h = marketInfo ? Number(marketInfo.change1h) : 0;
           const isUp = change1h >= 0;
           const valBRL = asset.token === 'BRL' ? Number(asset.balance) : (Number(asset.balance) * currentPrice);
-          
+
           return (
-            <div key={asset.id} className="card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', minHeight: '200px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: brand.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem' }}>
+            <div key={asset.id} className="card asset-card">
+              <div className="asset-card-header">
+                <div className="asset-card-title-group">
+                  <div className="asset-card-icon" style={{ background: brand.color }}>
                     {asset.token.charAt(0)}
                   </div>
-                  <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-main)' }}>{brand.name}</h3>
+                  <h3 className="asset-card-title">{brand.name}</h3>
                 </div>
                 {asset.token !== 'BRL' && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isUp ? '#10b981' : '#e11d48', fontWeight: '700', fontSize: '0.9rem' }}>
+                  <div className="asset-card-change" style={{ color: isUp ? '#10b981' : '#e11d48' }}>
                     <span dangerouslySetInnerHTML={{ __html: isUp ? icons.arrowUp : icons.arrowDown }} style={{ width: '12px', height: '12px' }} />
                     {Math.abs(change1h).toFixed(2)}%
                   </div>
                 )}
               </div>
-              <div style={{ marginBottom: '25px', filter: blurFilter }}>
-                <p style={{ margin: '0 0 4px 0', fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-main)' }}>
+              <div className="asset-card-balance-group" style={{ filter: blurFilter }}>
+                <p className="asset-card-balance">
                   {Number(asset.balance).toLocaleString('pt-BR')} {asset.token}
                 </p>
-                <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-muted)' }}>
+                <p className="asset-card-fiat">
                   R$ {valBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                 </p>
               </div>
-              <div style={{ display: 'flex', gap: '10px', marginTop: 'auto' }}>
-                <Link to="/swap" style={{ flex: 1, padding: '10px', textAlign: 'center', background: '#f8fafc', color: 'var(--primary)', border: '1px solid var(--border)', borderRadius: '8px', fontWeight: '600', textDecoration: 'none', fontSize: '0.9rem' }}>Swap</Link>
-                <Link to="/withdraw" style={{ flex: 1, padding: '10px', textAlign: 'center', background: '#f8fafc', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: '8px', fontWeight: '600', textDecoration: 'none', fontSize: '0.9rem' }}>Sacar</Link>
+              <div className="asset-card-actions">
+                <Link to="/swap" className="asset-btn asset-btn-primary">Swap</Link>
+                <Link to="/withdraw" className="asset-btn asset-btn-secondary">Sacar</Link>
               </div>
             </div>
           );

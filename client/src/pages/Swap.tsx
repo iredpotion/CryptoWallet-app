@@ -87,14 +87,14 @@ export default function Swap() {
     });
 
     if (confirmResult.isConfirmed) {
-      setIsSwapping(true); 
+      setIsSwapping(true);
       try {
         await api.post('/wallet/swap', { from: fromToken, to: toToken, amount: Number(amount) });
         Swal.fire({ icon: 'success', title: 'Sucesso!', text: 'Sua conversão foi realizada com sucesso.', confirmButtonColor: '#1e3a8a' });
         navigate('/dashboard');
       } catch (error: any) {
         Swal.fire({ icon: 'error', title: 'Falha na Conversão', text: error.response?.data?.message || 'Saldo insuficiente ou erro.', confirmButtonColor: '#1e3a8a' });
-        setIsSwapping(false); 
+        setIsSwapping(false);
       }
     }
   };
@@ -110,23 +110,23 @@ export default function Swap() {
     <Layout>
       <div className="swap-container">
 
-        <div className="card">
+        <div className="card swap-table-card">
           <h2 style={{ fontSize: '1.2rem', color: 'var(--text-main)', marginBottom: '20px' }}>Cotação Atual (BRL)</h2>
           <div className="table-responsive">
             <table>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>#</th>
-                  <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>Coin</th>
-                  <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>Valor em BRL</th>
-                  <th style={{ padding: '12px 10px', color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: '600' }}>1h</th>
+                <tr>
+                  <th>#</th>
+                  <th>Coin</th>
+                  <th>Valor em BRL</th>
+                  <th>1h</th>
                 </tr>
               </thead>
               <tbody>
                 {marketData.map((coin, index) => (
-                  <tr key={coin.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '16px 10px', color: 'var(--text-muted)' }}>{index + 1}</td>
-                    <td style={{ padding: '16px 10px' }}>
+                  <tr key={coin.id}>
+                    <td>{index + 1}</td>
+                    <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: coin.color, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.75rem' }}>{coin.symbol.charAt(0)}</div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -135,8 +135,8 @@ export default function Swap() {
                         </div>
                       </div>
                     </td>
-                    <td style={{ padding: '16px 10px', fontWeight: '700', color: 'var(--text-main)' }}>R$ {coin.priceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                    <td style={{ padding: '16px 10px' }}>
+                    <td style={{ fontWeight: '700', color: 'var(--text-main)' }}>R$ {coin.priceBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
+                    <td>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: coin.change1h >= 0 ? '#10b981' : '#e11d48', fontWeight: '700', fontSize: '0.9rem' }}>
                         <span dangerouslySetInnerHTML={{ __html: coin.change1h >= 0 ? icons.up : icons.down }} />
                         {Math.abs(coin.change1h).toFixed(2)}%
@@ -149,11 +149,11 @@ export default function Swap() {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card swap-form-card">
           <h2 style={{ fontSize: '1.2rem', marginBottom: '25px', color: 'var(--text-main)' }}>Converter Ativos</h2>
-          <form onSubmit={handleExecuteSwap} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <div>
-              <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '500' }}>Vender</label>
+          <form onSubmit={handleExecuteSwap} className="flex-form">
+            <div className="form-group">
+              <label>Vender</label>
               <select value={fromToken} onChange={(e) => setFromToken(e.target.value)} className="input-field" disabled={isSwapping}>
                 <option value="BRL">BRL (Real)</option>
                 <option value="BTC">BTC (Bitcoin)</option>
@@ -161,8 +161,8 @@ export default function Swap() {
                 <option value="USDT">USDT (Tether)</option>
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '500' }}>Comprar</label>
+            <div className="form-group">
+              <label>Comprar</label>
               <select value={toToken} onChange={(e) => setToToken(e.target.value)} className="input-field" disabled={isSwapping}>
                 <option value="BTC">BTC (Bitcoin)</option>
                 <option value="ETH">Ethereum (ETH)</option>
@@ -170,8 +170,8 @@ export default function Swap() {
                 <option value="BRL">BRL (Real)</option>
               </select>
             </div>
-            <div>
-              <label style={{ display: 'block', color: 'var(--text-muted)', marginBottom: '8px', fontSize: '0.9rem', fontWeight: '500' }}>Quantidade</label>
+            <div className="form-group">
+              <label>Quantidade</label>
               <input type="number" step="any" required value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" className="input-field" disabled={isSwapping} />
             </div>
 
@@ -186,13 +186,13 @@ export default function Swap() {
               )}
             </div>
 
-            <button 
-              type="submit" 
-              className="btn-primary" 
+            <button
+              type="submit"
+              className="btn-primary"
               disabled={isButtonDisabled}
-              style={{ 
+              style={{
                 marginTop: '10px',
-                opacity: isButtonDisabled ? 0.7 : 1, 
+                opacity: isButtonDisabled ? 0.7 : 1,
                 cursor: isButtonDisabled ? 'not-allowed' : 'pointer'
               }}
             >

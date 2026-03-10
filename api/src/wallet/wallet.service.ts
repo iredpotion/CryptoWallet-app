@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CryptoService } from './crypto.service';
+import { Prisma } from '@prisma/client';
 
 // Serviço responsável por gerenciar a lógica de negócios das carteiras, transações, saldos e histórico
 @Injectable()
@@ -74,7 +75,7 @@ export class WalletService {
       if (!wallet) throw new BadRequestException('Wallet not found');
 
       const assetFrom = wallet.assets.find((a) => a.token === fromToken);
-      if (!assetFrom || Number(assetFrom.balance) < amount) {
+      if (!assetFrom) {
         throw new BadRequestException('Insufficient balance');
       }
 
@@ -85,18 +86,22 @@ export class WalletService {
         });
       }
 
-      const netAmount = amount - quote.fee;
-      const newBalanceFrom = Number(assetFrom.balance) - amount;
-      const newBalanceTo = Number(assetTo.balance) + quote.estimatedOutput;
+      const netAmount = new Prisma.Decimal(amount).minus(quote.fee).toNumber();
 
-      await tx.walletAsset.update({
+      // Utilizando operações atômicas (decrement/increment) no banco para impedir TOCTOU
+      const updatedAssetFrom = await tx.walletAsset.update({
         where: { id: assetFrom.id },
-        data: { balance: newBalanceFrom },
+        data: { balance: { decrement: amount } },
       });
 
-      await tx.walletAsset.update({
+      // Se a atualização atômica negativou o saldo (ocorrido por requisições mútiplas ao mesmo tempo), aborta
+      if (updatedAssetFrom.balance.lessThan(0)) {
+        throw new BadRequestException('Insufficient balance');
+      }
+
+      const updatedAssetTo = await tx.walletAsset.update({
         where: { id: assetTo.id },
-        data: { balance: newBalanceTo },
+        data: { balance: { increment: quote.estimatedOutput } },
       });
 
       await tx.walletStatement.create({
@@ -105,8 +110,8 @@ export class WalletService {
           token: fromToken,
           type: 'SWAP_OUT',
           amount: -netAmount,
-          balanceBefore: assetFrom.balance,
-          balanceAfter: Number(assetFrom.balance) - netAmount,
+          balanceBefore: updatedAssetFrom.balance.plus(amount),
+          balanceAfter: updatedAssetFrom.balance.plus(quote.fee),
         },
       });
 
@@ -116,8 +121,8 @@ export class WalletService {
           token: fromToken,
           type: 'SWAP_FEE',
           amount: -quote.fee,
-          balanceBefore: Number(assetFrom.balance) - netAmount,
-          balanceAfter: newBalanceFrom,
+          balanceBefore: updatedAssetFrom.balance.plus(quote.fee),
+          balanceAfter: updatedAssetFrom.balance,
         },
       });
 
@@ -127,8 +132,8 @@ export class WalletService {
           token: toToken,
           type: 'SWAP_IN',
           amount: quote.estimatedOutput,
-          balanceBefore: assetTo.balance,
-          balanceAfter: newBalanceTo,
+          balanceBefore: updatedAssetTo.balance.minus(quote.estimatedOutput),
+          balanceAfter: updatedAssetTo.balance,
         },
       });
 
@@ -151,16 +156,18 @@ export class WalletService {
       if (!wallet) throw new NotFoundException('Wallet not found');
 
       const asset = wallet.assets.find((a) => a.token === token);
-      if (!asset || Number(asset.balance) < amount) {
+      if (!asset) {
         throw new BadRequestException('Insufficient balance for withdrawal');
       }
 
-      const newBalance = Number(asset.balance) - amount;
-
-      await tx.walletAsset.update({
+      const updatedAsset = await tx.walletAsset.update({
         where: { id: asset.id },
-        data: { balance: newBalance },
+        data: { balance: { decrement: amount } },
       });
+
+      if (updatedAsset.balance.lessThan(0)) {
+        throw new BadRequestException('Insufficient balance for withdrawal');
+      }
 
       const statement = await tx.walletStatement.create({
         data: {
@@ -168,8 +175,8 @@ export class WalletService {
           token,
           type: 'WITHDRAWAL',
           amount: -amount,
-          balanceBefore: asset.balance,
-          balanceAfter: newBalance,
+          balanceBefore: updatedAsset.balance.plus(amount),
+          balanceAfter: updatedAsset.balance,
         },
       });
 

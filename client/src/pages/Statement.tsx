@@ -12,36 +12,35 @@ export default function Statement() {
   return (
     <Layout>
       <div style={{ padding: '0 15px' }}>
-        <div className="card">
+        <div className="card swap-table-card">
           <h2 style={{ marginBottom: '30px', color: 'var(--text-main)' }}>Histórico de Transações</h2>
-          
+
           <div className="table-responsive">
             <table>
               <thead>
-                <tr style={{ borderBottom: '2px solid var(--border)' }}>
-                  <th style={{ padding: '15px', color: 'var(--text-muted)' }}>Data</th>
-                  <th style={{ padding: '15px', color: 'var(--text-muted)' }}>Operação</th>
-                  <th style={{ padding: '15px', color: 'var(--text-muted)' }}>Ativo</th>
-                  <th style={{ padding: '15px', color: 'var(--text-muted)' }}>Valor</th>
+                <tr>
+                  <th>Data</th>
+                  <th>Operação</th>
+                  <th>Ativo</th>
+                  <th>Valor</th>
                 </tr>
               </thead>
-              
+
               <tbody>
                 {statements.map((stmt) => (
-                  <tr key={stmt.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '15px', color: 'var(--text-main)' }}>
+                  <tr key={stmt.id}>
+                    <td>
                       {new Date(stmt.createdAt).toLocaleString('pt-BR')}
                     </td>
-                    <td style={{ padding: '15px', fontWeight: '500', color: 'var(--text-main)' }}>
+                    <td style={{ fontWeight: '500', color: 'var(--text-main)' }}>
                       {stmt.type}
                     </td>
-                    <td style={{ padding: '15px', fontWeight: 'bold', color: 'var(--text-main)' }}>
+                    <td style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>
                       {stmt.token}
                     </td>
-                    <td style={{ 
-                      padding: '15px', 
-                      fontWeight: 'bold', 
-                      color: Number(stmt.amount) > 0 ? '#008000' : '#FF0000' 
+                    <td style={{
+                      fontWeight: 'bold',
+                      color: Number(stmt.amount) > 0 ? '#008000' : '#FF0000'
                     }}>
                       {Number(stmt.amount) > 0 ? '+' : ''}
                       {Number(stmt.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}

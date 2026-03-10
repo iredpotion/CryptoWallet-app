@@ -14,17 +14,14 @@ export default function Header() {
   // Renderiza o link de navegação aplicando o azul marinho para destacar a rota ativa
   const navItem = (path: string, label: string, icon: string) => {
     const isActive = location.pathname === path;
+    const activeStyle = isActive
+      ? { background: 'var(--primary)', color: '#FFFFFF' }
+      : { background: 'transparent', color: 'var(--text-muted)' };
+
     return (
-      <Link to={path} style={{
-        display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none',
-        padding: '8px 16px', borderRadius: '8px',
-        background: isActive ? 'var(--primary)' : 'transparent',
-        color: isActive ? '#FFFFFF' : 'var(--text-muted)',
-        fontWeight: isActive ? '600' : '500', transition: '0.2s',
-        whiteSpace: 'nowrap' // Evita que o texto quebre em duas linhas no celular
-      }}>
-        <span dangerouslySetInnerHTML={{ __html: icon }} style={{ width: '18px', height: '18px' }} />
-        {label}
+      <Link to={path} className="nav-link" style={activeStyle}>
+        <span dangerouslySetInnerHTML={{ __html: icon }} style={{ width: '18px', height: '18px', display: 'flex' }} />
+        <span>{label}</span>
       </Link>
     );
   };
@@ -36,29 +33,17 @@ export default function Header() {
   };
 
   return (
-    <header className="card" style={{ 
-      padding: '15px 25px', 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center', 
-      marginBottom: '20px',
-      flexWrap: 'wrap', // Permite que os itens desçam caso a tela seja muito estreita
-      gap: '15px'       // Espaçamento seguro entre os itens quando quebram de linha
-    }}>
+    <header className="card header-container">
       <Link to="/dashboard" style={{ textDecoration: 'none' }}>
         <Logo />
       </Link>
-      
-      <nav style={{ display: 'flex', gap: '5px' }}>
+
+      <nav className="nav-menu">
         {navItem('/dashboard', 'Página Principal', icons.home)}
       </nav>
 
-      <button onClick={handleLogout} style={{ 
-        background: 'transparent', border: 'none', color: 'var(--text-muted)', 
-        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', 
-        fontWeight: '500', padding: '8px' 
-      }}>
-        <span dangerouslySetInnerHTML={{ __html: icons.logout }} style={{ width: '18px', height: '18px' }} /> Sair
+      <button onClick={handleLogout} className="nav-link" style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '8px' }}>
+        <span dangerouslySetInnerHTML={{ __html: icons.logout }} style={{ width: '18px', height: '18px', display: 'flex' }} /> <span>Sair</span>
       </button>
     </header>
   );

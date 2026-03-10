@@ -5,15 +5,19 @@ import { PrismaModule } from './prisma/prisma.module';
 import { WalletModule } from './wallet/wallet.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { WebhookController } from './webhook/webhook.controller';
-import { WebhookService } from './webhook/webhook.service';
-import { PrismaService } from './prisma/prisma.service';
-import { CryptoService } from './wallet/crypto.service';
-import { WalletService } from './wallet/wallet.service';
+import { WebhookModule } from './webhook/webhook.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PrismaModule, WalletModule, UsersModule, AuthModule],
-  controllers: [AppController, WebhookController],
-  providers: [AppService, WebhookService, PrismaService, WalletService, CryptoService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    WalletModule,
+    UsersModule,
+    AuthModule,
+    WebhookModule
+  ],
+  controllers: [AppController],
+  providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 /* =========================================
    1. Variáveis Globais (Design Tokens)
    ========================================= */
@@ -8,7 +6,8 @@
   --bg-card: #ffffff;
   --text-main: #0f172a;
   --text-muted: #64748b;
-  --primary: #1e3a8a; /* Azul Marinho Original */
+  --primary: #1e3a8a;
+  /* Azul Marinho Original */
   --primary-hover: #172554;
   --border: #e2e8f0;
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.04);
@@ -17,23 +16,23 @@
 /* =========================================
    2. Reset e Tipografia Base
    ========================================= */
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
-  font-family: 'Inter', sans-serif; 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
 }
 
-body { 
-  background-color: var(--bg-body); 
-  color: var(--text-main); 
-  min-height: 100vh; 
+body {
+  background-color: var(--bg-body);
+  color: var(--text-main);
+  min-height: 100vh;
 }
 
-.app-container { 
-  max-width: 1100px; 
-  margin: 0 auto; 
-  padding: 20px; 
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px;
 }
 
 /* =========================================
@@ -47,67 +46,94 @@ body {
 }
 
 .input-field {
-  width: 100%; 
-  padding: 14px; 
-  border: 1px solid var(--border); 
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  background: #f8fafc; 
-  color: var(--text-main); 
-  font-size: 1rem; 
-  outline: none; 
+  background: #f8fafc;
+  color: var(--text-main);
+  font-size: 1rem;
+  outline: none;
   transition: 0.2s;
 }
 
-.input-field:focus { 
-  border-color: var(--primary); 
-  background: #fff; 
+.input-field:focus {
+  border-color: var(--primary);
+  background: #fff;
 }
 
 .btn-primary {
-  background: var(--primary); 
-  color: white; 
-  border: none; 
+  background: var(--primary);
+  color: white;
+  border: none;
   padding: 12px 24px;
-  border-radius: 10px; 
-  font-weight: 600; 
-  cursor: pointer; 
-  transition: 0.2s; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px; 
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-decoration: none;
 }
 
-.btn-primary:hover:not(:disabled) { 
-  background: var(--primary-hover); 
-  transform: translateY(-1px); 
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
 }
 
 .btn-outline {
-  background: transparent; 
-  color: var(--text-main); 
-  border: 1px solid var(--border); 
+  background: transparent;
+  color: var(--text-main);
+  border: 1px solid var(--border);
   padding: 12px 24px;
-  border-radius: 10px; 
-  font-weight: 500; 
-  cursor: pointer; 
-  transition: 0.2s; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  gap: 8px; 
+  border-radius: 10px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   text-decoration: none;
 }
 
-.btn-outline:hover:not(:disabled) { 
-  background: #f8fafc; 
-  border-color: #cbd5e1; 
+.btn-outline:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 /* =========================================
    4. Classes de Layout e Responsividade (NOVO)
    ========================================= */
+
+/* Header e Navigation */
+.header-container {
+  padding: 15px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 5px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  transition: 0.2s;
+  white-space: nowrap;
+}
 
 /* Dashboard Header (Saldo e Botões) */
 .dashboard-header {
@@ -119,9 +145,30 @@ body {
   margin-bottom: 30px;
 }
 
+.dashboard-header-title {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header-title .balance-label-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.dashboard-header-title .balance-label {
+  color: var(--text-muted);
+  margin: 0;
+  font-size: 1.1rem;
+}
+
 .dashboard-header-title h1 {
   font-size: 3rem;
   margin: 0;
+  color: var(--text-main);
+  font-weight: 800;
+  transition: filter 0.3s ease;
   word-break: break-all;
 }
 
@@ -140,6 +187,96 @@ body {
   gap: 20px;
 }
 
+.asset-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+}
+
+.asset-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.asset-card-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.asset-card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.asset-card-title {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--text-main);
+}
+
+.asset-card-change {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.asset-card-balance-group {
+  margin-bottom: 25px;
+}
+
+.asset-card-balance {
+  margin: 0 0 4px 0;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.asset-card-fiat {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+}
+
+.asset-card-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.asset-btn {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.asset-btn-primary {
+  color: var(--primary);
+}
+
+.asset-btn-secondary {
+  color: var(--text-main);
+}
+
+
 /* Tela de Swap (Tabela e Formulário) */
 .swap-container {
   display: grid;
@@ -148,7 +285,14 @@ body {
   align-items: flex-start;
 }
 
-/* Tabelas Responsivas (Para dar scroll horizontal apenas na tabela) */
+.swap-table-card {
+  padding: 20px;
+}
+
+.swap-form-card {
+  padding: 30px;
+}
+
 .table-responsive {
   width: 100%;
   overflow-x: auto;
@@ -157,11 +301,55 @@ body {
 
 .table-responsive table {
   width: 100%;
-  min-width: 500px; 
+  min-width: 500px;
   border-collapse: collapse;
 }
 
-/* Formulários Centralizados (Deposit / Withdraw) */
+.table-responsive th {
+  padding: 12px 10px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.table-responsive td {
+  padding: 16px 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Formulários Flexíveis (Login, Register, Deposit, Withdraw) */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: clamp(30px, 5vw, 50px) clamp(20px, 5vw, 40px);
+  box-sizing: border-box;
+}
+
+.flex-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
 .form-container {
   width: 100%;
   max-width: 500px;
@@ -170,14 +358,45 @@ body {
   box-sizing: border-box;
 }
 
+/* Statement (Extrato) */
+.statement-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+  gap: 15px;
+}
+
+.statement-icon-bg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* =========================================
    5. Media Queries (Ajustes para Celulares)
    ========================================= */
+
 @media (max-width: 768px) {
+  .header-container {
+    justify-content: center;
+    flex-direction: column;
+    padding: 15px;
+  }
+
+  .nav-menu {
+    width: 100%;
+    justify-content: center;
+  }
+
   .dashboard-header {
     flex-direction: column;
-    align-items: flex-start;
-    padding: 20px;
+    align-items: stretch;
+    padding: 25px;
   }
 
   .dashboard-header-title h1 {
@@ -186,18 +405,39 @@ body {
 
   .action-buttons-grid {
     max-width: 100%;
+    grid-template-columns: 1fr;
   }
 
   .swap-container {
-    grid-template-columns: 1fr; /* Coloca a tabela e o form um embaixo do outro */
+    grid-template-columns: 1fr;
   }
 
   .card {
-    padding: 20px !important; /* Reduz o respiro interno nos celulares */
+    padding: 20px;
   }
 
   .form-container {
     margin: 20px auto;
-    padding: 25px !important;
+    padding: 25px;
+  }
+
+  .swap-form-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-header-title h1 {
+    font-size: 1.8rem;
+  }
+
+  .nav-link span {
+    display: none;
+    /* Hide icon on very small screens, only keep text if needed, or hide text */
+  }
+
+  .nav-link {
+    font-size: 0.9rem;
+    padding: 8px 10px;
   }
 }

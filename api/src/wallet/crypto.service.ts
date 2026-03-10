@@ -14,6 +14,15 @@ export class CryptoService {
     BRL: 'brazilian-real',
   };
 
+  // Melhorando a taxa de sucesso com Headers que imitam um navegador padrão
+  private readonly axiosConfig = {
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'application/json'
+    },
+    timeout: 5000
+  };
+
   // Configurações e estado do cache em memória para otimização de requisições e prevenção de rate limits
   private cachedMarketData: any = null;
   private lastFetchTime: number = 0;
@@ -43,20 +52,23 @@ export class CryptoService {
 
       if (targetToken === 'BRL') {
         const response = await axios.get(this.COINGECKO_SIMPLE_URL, {
+          ...this.axiosConfig,
           params: { ids: baseId, vs_currencies: 'brl' },
         });
         finalPrice = response.data[baseId]?.brl;
-        if (!finalPrice) throw new Error('Preço não encontrado');
+        if (!finalPrice) throw new Error('Preço não encontrado na resposta');
       } else if (baseToken === 'BRL') {
         const targetId = this.tokenMap[targetToken];
         const response = await axios.get(this.COINGECKO_SIMPLE_URL, {
+          ...this.axiosConfig,
           params: { ids: targetId, vs_currencies: 'brl' },
         });
         const priceInBrl = response.data[targetId]?.brl;
-        if (!priceInBrl) throw new Error('Preço inverso não encontrado');
+        if (!priceInBrl) throw new Error('Preço inverso não encontrado na resposta');
         finalPrice = 1 / priceInBrl;
       } else {
         const response = await axios.get(this.COINGECKO_SIMPLE_URL, {
+          ...this.axiosConfig,
           params: { ids: `${baseId},${this.tokenMap[targetToken]}`, vs_currencies: 'brl' },
         });
         const basePriceBrl = response.data[baseId]?.brl;
@@ -69,9 +81,16 @@ export class CryptoService {
       return finalPrice;
 
     } catch (error) {
-      console.warn(`Erro na CoinGecko (Swap ${cacheKey}):`, error.message);
-      
-      if (this.simplePriceCache[cacheKey]) return this.simplePriceCache[cacheKey].price;
+      // Log detalhado para identificar se é Rate Limit (429) ou erro de conexão
+      const status = error.response?.status;
+      const data = error.response?.data;
+      console.warn(`[CryptoService] Erro ao buscar cotação de ${baseToken}-${targetToken}. Status: ${status || 'N/A'}. Detalhes: ${JSON.stringify(data || error.message)}`);
+
+      if (this.simplePriceCache[cacheKey]) {
+        console.log(`[CryptoService] Usando cache expirado de ${cacheKey} como fallback.`);
+        return this.simplePriceCache[cacheKey].price;
+      }
+      console.log(`[CryptoService] Acionando mock estático para ${cacheKey}.`);
       return this.getMockPrice(baseToken, targetToken);
     }
   }
@@ -85,9 +104,10 @@ export class CryptoService {
     }
 
     const ids = tokens.map(t => this.tokenMap[t]).filter(Boolean).join(',');
-    
+
     try {
       const response = await axios.get(this.COINGECKO_MARKET_URL, {
+        ...this.axiosConfig,
         params: {
           vs_currency: 'brl',
           ids: ids,
@@ -100,6 +120,7 @@ export class CryptoService {
         return {
           symbol,
           price: coin.current_price,
+          // A API do CoinGecko retorna a chave price_change_percentage_1h_in_currency quando o paramêntro é enviado
           change1h: coin.price_change_percentage_1h_in_currency || 0
         };
       });
@@ -110,13 +131,16 @@ export class CryptoService {
       return formattedData;
 
     } catch (error) {
-      console.warn('Erro ao buscar Market Data:', error.message);
-      
+      // Identificando o real motivo da falha do CoinGecko no log do servidor
+      const status = error.response?.status;
+      console.warn(`[CryptoService] Erro ao buscar Market Data. Status: ${status || 'N/A'}. Mensagem: ${error.message}`);
+
       if (this.cachedMarketData) {
-        console.log('Retornando dados do Cache em Memória para evitar quebra da tela.');
+        console.log('[CryptoService] Retornando dados do Cache em Memória devido a falha da API externa.');
         return this.cachedMarketData;
       }
 
+      console.log('[CryptoService] Retornando MOCKS estáticos devido a falha total e sem cache.');
       return [
         { symbol: 'BTC', price: 350000, change1h: 0 },
         { symbol: 'ETH', price: 18000, change1h: 0 },
